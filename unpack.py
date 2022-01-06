@@ -128,7 +128,7 @@ for i in range(numberOfBytesToRead):
     #print("[#] Position: {0}".format(fileOffset), end="\r", flush=True)
 
 print("[*] Writing file")
-with open("decrypted_{0}".format(fileName), "wb") as f:
+with open("decrypted_{0}".format(os.path.basename(fileName)), "wb") as f:
         f.write(decrypted_file)
 
 
