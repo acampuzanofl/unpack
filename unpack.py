@@ -96,6 +96,7 @@ buf[1] = sha_object[0x51]
 buf[2] = sha_object[0x52]
 buf[3] = sha_object[0x53]
 buf[4] = sha_object[0x54]
+print("[*] Generating Salt")
 for i in range(0, 0x40000, 5):
     buf[5] +=  1
     sha_object = sha(buf)
@@ -106,6 +107,27 @@ for i in range(0, 0x40000, 5):
     salt[i + 3] = sha_object[0x53]
     salt[i + 4] = sha_object[0x54]
 
+
+print("[*] Packing Salt to Bytes")
+saltBytes = b""
+for int in salt:
+    pack = struct.pack("I", int)
+    saltBytes += pack
+
+print("[*] Decrypting File")
+decrypted_file = b"" 
+fileOffset = 0
+numberOfBytesToRead = fileSize[0]
+for i in range(numberOfBytesToRead):
+    offsetLow = fileOffset & 0xFFFFF
+    offsetHigh = fileOffset >> 0x14
+    dec = fileContent[fileOffset] ^ saltBytes[offsetLow] ^ saltBytes[offsetHigh + 1] ^ saltBytes[offsetHigh + 2]
+    decrypted_file += dec.to_bytes(1,'little')
+    fileOffset += 1
+
+print("[*] Writing file")
+with open("decrypted.bin", "wb") as f:
+        f.write(decrypted_file)
 
 
 
