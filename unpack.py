@@ -1,5 +1,7 @@
 import os,sys
 import struct
+import numpy
+from numpy.lib.function_base import append
 
 rol = lambda val, r_bits, max_bits: \
     (val << r_bits%max_bits) & (2**max_bits-1) | \
@@ -115,18 +117,18 @@ for int in salt:
     saltBytes += pack
 
 print("[*] Decrypting File")
-decrypted_file = b"" 
 fileOffset = 0
+decrypted_file = bytearray()
 numberOfBytesToRead = fileSize[0]
 for i in range(numberOfBytesToRead):
     offsetLow = fileOffset & 0xFFFFF
     offsetHigh = fileOffset >> 0x14
-    dec = fileContent[fileOffset] ^ saltBytes[offsetLow] ^ saltBytes[offsetHigh + 1] ^ saltBytes[offsetHigh + 2]
-    decrypted_file += dec.to_bytes(1,'little')
+    decrypted_file.append(fileContent[fileOffset] ^ saltBytes[offsetLow] ^ saltBytes[offsetHigh + 1] ^ saltBytes[offsetHigh + 2])
     fileOffset += 1
+    #print("[#] Position: {0}".format(fileOffset), end="\r", flush=True)
 
 print("[*] Writing file")
-with open("decrypted.bin", "wb") as f:
+with open("decrypted_{0}".format(fileName), "wb") as f:
         f.write(decrypted_file)
 
 
